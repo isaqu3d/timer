@@ -1,9 +1,7 @@
+import { Router } from "./Router.tsx";
+
 function App() {
-  return (
-    <>
-      <h1 className="bg-red-400">Hello, time</h1>
-    </>
-  );
+  return <Router />;
 }
 
 export default App;
