@@ -5,3 +5,7 @@
 body {
   @apply bg-gray-700 text-white;
 }
+
+input::-webkit-calendar-picker-indicator {
+  display: none !important;
+}
