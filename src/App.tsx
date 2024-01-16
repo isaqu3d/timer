@@ -1,7 +1,12 @@
 import { Router } from "./Router.tsx";
+import { CyclesContextProvider } from "./context/CyclesContext.tsx";
 
 function App() {
-  return <Router />;
+  return (
+    <CyclesContextProvider>
+      <Router />;
+    </CyclesContextProvider>
+  );
 }
 
 export default App;
