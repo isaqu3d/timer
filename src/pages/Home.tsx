@@ -1,37 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { HandPalm, Play } from "@phosphor-icons/react";
-import { createContext, useState } from "react";
+import { useContext } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import zod from "zod";
 import { Countdown } from "../components/Countdown";
 import { FormNewCycle } from "../components/FormNewCycle";
 import { Header } from "../components/Header";
-
-interface Cycle {
-  id: string;
-  task: string;
-  minutesAmount: number;
-  startDate: Date;
-  interruptedDate?: Date;
-  finishedDate?: Date;
-}
-
-interface CyclesContextType {
-  activeCycle: Cycle | undefined;
-  activeCycleId: string | null;
-  amountSecondsPassed: number;
-  markCurrentCycleAsFinished: () => void;
-  setSecondsPassed: (seconds: number) => void;
-}
-
-export const CyclesContext = createContext({} as CyclesContextType);
+import CyclesContext from "../context/CyclesContext";
 
 export function Home() {
-  const [cycles, setCycles] = useState<Cycle[]>([]);
-  const [activeCycleId, setActiveCycleId] = useState<string | null>(null);
-  const [amountSecondsPassed, setAmountSecondsPassed] = useState(0);
-
-  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId);
+  const { activeCycle, createNewCycle, interruptCurrentCycle } =
+    useContext(CyclesContext);
 
   const newCycleFormValidationSchema = zod.object({
     task: zod.string().min(3, "Informe a tarefa"),
@@ -41,8 +20,8 @@ export function Home() {
       .max(60, "O ciclo precisa ser de no máximo 60 minutos"),
   });
 
-  type newCycleFormData = zod.infer<typeof newCycleFormValidationSchema>;
-  const newCycleForm = useForm<newCycleFormData>({
+  type NewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>;
+  const newCycleForm = useForm<NewCycleFormData>({
     resolver: zodResolver(newCycleFormValidationSchema),
     defaultValues: {
       task: "",
@@ -52,50 +31,9 @@ export function Home() {
 
   const { handleSubmit, watch, reset } = newCycleForm;
 
-  const setSecondsPassed = (seconds: number) => {
-    setAmountSecondsPassed(seconds);
-  };
-
-  const markCurrentCycleAsFinished = () => {
-    setCycles((state) =>
-      state.map((cycle) => {
-        if (cycle.id === activeCycleId) {
-          return { ...cycle, finishedDate: new Date() };
-        } else {
-          return cycle;
-        }
-      })
-    );
-  };
-
-  const handleCreateNewCycle = (data: newCycleFormData) => {
-    const id = String(new Date().getTime());
-    const newCycle: Cycle = {
-      id,
-      task: data.task,
-      minutesAmount: data.minutesAmount,
-      startDate: new Date(),
-    };
-
-    setCycles((prevState) => [...prevState, newCycle]);
-    setActiveCycleId(id);
-    setAmountSecondsPassed(0);
-
+  const handleCreateNewCycle = (data: NewCycleFormData) => {
+    createNewCycle(data);
     reset();
-  };
-
-  const handleInterruptCycle = () => {
-    setCycles((state) =>
-      state.map((cycle) => {
-        if (cycle.id === activeCycleId) {
-          return { ...cycle, interruptedDate: new Date() };
-        } else {
-          return cycle;
-        }
-      })
-    );
-
-    setActiveCycleId(null);
   };
 
   const task = watch("task");
@@ -114,25 +52,15 @@ export function Home() {
             action=""
             className="flex flex-col items-center gap-14"
           >
-            <CyclesContext.Provider
-              value={{
-                activeCycle,
-                activeCycleId,
-                markCurrentCycleAsFinished,
-                amountSecondsPassed,
-                setSecondsPassed,
-              }}
-            >
-              <FormProvider {...newCycleForm}>
-                <FormNewCycle />
-              </FormProvider>
-              <Countdown />
-            </CyclesContext.Provider>
+            <FormProvider {...newCycleForm}>
+              <FormNewCycle />
+            </FormProvider>
+            <Countdown />
 
             {activeCycle ? (
               <button
                 type="button"
-                onClick={handleInterruptCycle}
+                onClick={interruptCurrentCycle}
                 className="w-full p-4 rounded-md font-bold gap-2 bg-red-500 text-gray-100 enabled:hover:bg-red-600 transition-colors flex justify-center items-center text-2xl disabled:opacity-70 disabled:cursor-not-allowed disabled:hover"
               >
                 <HandPalm /> Interromper
