@@ -42,7 +42,7 @@ export function Home() {
   const isSubmitDisabled = !task || !minutesFilled;
 
   return (
-    <div className="max-w-6xl h-[calc(100vh_-_10rem)] my-20 mx-auto bg-zinc-800 rounded-md">
+    <div className="max-w-7xl h-[calc(100vh_-_10rem)] my-20 mx-auto bg-zinc-800 rounded-md">
       <>
         <Header />
 
