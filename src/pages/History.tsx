@@ -67,7 +67,7 @@ export function History() {
                     </td>
 
                     <td className="bg-gray-500 border-t-gray-800 border-t leading-4 p-4 text-sm">
-                      {formatDistanceToNow(cycle.startDate, {
+                      {formatDistanceToNow(new Date(cycle.startDate), {
                         addSuffix: true,
                         locale: ptBR,
                       })}
