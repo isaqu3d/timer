@@ -1,5 +1,8 @@
-import { ReactNode } from "react";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale/pt-BR";
+import { ReactNode, useContext } from "react";
 import { Header } from "../components/Header";
+import CyclesContext from "../context/CyclesContext";
 
 const STATUS_COLORS = {
   red: "bg-[#F03847]",
@@ -24,6 +27,7 @@ const Status = ({ statusColor, children }: StatusColorsProps) => {
 };
 
 export function History() {
+  const { cycles } = useContext(CyclesContext);
   return (
     <div className="max-w-7xl h-[calc(100vh_-_10rem)] my-20 mx-auto bg-zinc-800 rounded-md">
       <Header />
@@ -34,7 +38,7 @@ export function History() {
           <table className="w-full border-collapse min-w-[600px]">
             <thead>
               <tr>
-                <th className="bg-gray-600 p-4 text-left text-gray-100 text-sm leading-4 rounded-t-lg">
+                <th className="bg-gray-600 p-4 text-left text-gray-100 text-sm leading-4 rounded-l-lg">
                   Tarefa
                 </th>
                 <th className="bg-gray-600 p-4 text-left text-gray-100 text-sm leading-4">
@@ -44,72 +48,47 @@ export function History() {
                   Início
                 </th>
 
-                <th className="bg-gray-600 p-4 text-left text-gray-100 text-sm leading-4 rounded-t-lg pr-6">
+                <th className="bg-gray-600 p-4 text-left text-gray-100 text-sm leading-4 rounded-r-lg pr-6">
                   Status
                 </th>
               </tr>
             </thead>
 
             <tbody>
-              <tr className="[&>*:first-child]:w-2/4">
-                <td className="bg-gray-500 border-t-gray-800 border-t leading-4 p-4 text-sm ">
-                  Ignite time
-                </td>
-                <td className="bg-gray-500 border-t-gray-800 border-t leading-4 p-4 text-sm">
-                  25 minutos
-                </td>
-                <td className="bg-gray-500 border-t-gray-800 border-t leading-4 p-4 text-sm">
-                  Há cerca de 2 meses
-                </td>
-                <td className="bg-gray-500 border-t-gray-800 border-t leading-4 p-4 text-sm">
-                  <Status statusColor="red">Interrompido</Status>
-                </td>
-              </tr>
+              {cycles.map((cycle) => {
+                return (
+                  <tr key={cycle.id} className="[&>*:first-child]:w-2/4">
+                    <td className="bg-gray-500 border-t-gray-800 border-t leading-4 p-4 text-sm ">
+                      {cycle.task}
+                    </td>
 
-              <tr>
-                <td className="bg-gray-500 border-t-gray-800 border-t leading-4 p-4 text-sm">
-                  Tarefa
-                </td>
-                <td className="bg-gray-500 border-t-gray-800 border-t leading-4 p-4 text-sm">
-                  25 minutos
-                </td>
-                <td className="bg-gray-500 border-t-gray-800 border-t leading-4 p-4 text-sm">
-                  Há cerca de 2 meses
-                </td>
-                <td className="bg-gray-500 border-t-gray-800 border-t leading-4 p-4 text-sm">
-                  <Status statusColor="green">Concluído</Status>
-                </td>
-              </tr>
+                    <td className="bg-gray-500 border-t-gray-800 border-t leading-4 p-4 text-sm">
+                      {cycle.minutesAmount} minutos
+                    </td>
 
-              <tr>
-                <td className="bg-gray-500 border-t-gray-800 border-t leading-4 p-4 text-sm">
-                  Tarefa
-                </td>
-                <td className="bg-gray-500 border-t-gray-800 border-t leading-4 p-4 text-sm">
-                  25 minutos
-                </td>
-                <td className="bg-gray-500 border-t-gray-800 border-t leading-4 p-4 text-sm">
-                  Há cerca de 2 meses
-                </td>
-                <td className="bg-gray-500 border-t-gray-800 border-t leading-4 p-4 text-sm">
-                  <Status statusColor="red">Interrompido</Status>
-                </td>
-              </tr>
+                    <td className="bg-gray-500 border-t-gray-800 border-t leading-4 p-4 text-sm">
+                      {formatDistanceToNow(cycle.startDate, {
+                        addSuffix: true,
+                        locale: ptBR,
+                      })}
+                    </td>
 
-              <tr>
-                <td className="bg-gray-500 border-t-gray-800 border-t leading-4 p-4 text-sm">
-                  Tarefa
-                </td>
-                <td className="bg-gray-500 border-t-gray-800 border-t leading-4 p-4 text-sm">
-                  25 minutos
-                </td>
-                <td className="bg-gray-500 border-t-gray-800 border-t leading-4 p-4 text-sm">
-                  Há cerca de 2 meses
-                </td>
-                <td className="bg-gray-500 border-t-gray-800 border-t  p-4 text-sm">
-                  <Status statusColor="yellow">Em andamento</Status>
-                </td>
-              </tr>
+                    <td className="bg-gray-500 border-t-gray-800 border-t leading-4 p-4 text-sm">
+                      {cycle.finishedDate && (
+                        <Status statusColor="green">Concluído</Status>
+                      )}
+
+                      {cycle.interruptedDate && (
+                        <Status statusColor="red">Interrompido</Status>
+                      )}
+
+                      {!cycle.finishedDate && !cycle.interruptedDate && (
+                        <Status statusColor="yellow">Em andamento</Status>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
